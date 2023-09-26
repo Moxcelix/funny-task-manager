@@ -2,6 +2,6 @@
 {
     public interface IPriorityComputer
     {
-        public void ComputePriority(Task task, double time);
+        public double ComputePriority(Task task, double time);
     }
 }
