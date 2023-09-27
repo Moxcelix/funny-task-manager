@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Models
+﻿namespace TaskManagerModel.Models
 {
     public interface IPriorityComputer
     {

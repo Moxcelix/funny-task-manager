@@ -1,4 +1,4 @@
-﻿namespace TaskManager
+﻿namespace TaskManagerModel
 {
     public class Programm
     {

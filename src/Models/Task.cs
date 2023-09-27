@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Models
+﻿namespace TaskManagerModel.Models
 {
     /// <summary>
     /// Класс задачи.
@@ -44,6 +44,11 @@
         /// Время выполнения на процессоре.
         /// </summary>
         public int TactCount { get; private set; }
+
+        /// <summary>
+        /// Выполнена ли задача.
+        /// </summary>
+        public bool IsCompleted { get; private set; } = false;
 
         /// <summary>
         /// Конструктор задачи.
@@ -94,9 +99,12 @@
                 return;
             }
 
-            SwitchState(TaskState.Running);
-
             TactCount--;
+
+            if(TactCount == 0)
+            {
+                IsCompleted = true;
+            }
         }
     }
 }

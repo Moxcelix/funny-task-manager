@@ -1,6 +1,6 @@
-﻿using TaskManager.Models;
+﻿using TaskManagerModel.Models;
 
-namespace TaskManager.Application
+namespace TaskManagerModel.Infrastructure
 {
     /// <summary>
     /// Класс-реализация интерфейса поставщика id.

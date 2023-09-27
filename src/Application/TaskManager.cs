@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using TaskManager.Models;
+using TaskManagerModel.Models;
 
-using Task = TaskManager.Models.Task;
+using Task = TaskManagerModel.Models.Task;
 
-namespace TaskManager.Application
+namespace TaskManagerModel.Application
 {
     /// <summary>
     /// Класс диспетчера задач.
@@ -28,7 +28,12 @@ namespace TaskManager.Application
         /// <summary>
         /// Текущая задача.
         /// </summary>
-        public Task CurrentTask { get; private set; }
+        public Task? CurrentTask { get; private set; }
+
+        /// <summary>
+        /// Пока очередь не закончилась, диспетчер задач работает.
+        /// </summary>
+        public bool IsRunning => _tasks.Count > 0;
 
         /// <summary>
         /// Конструктор класса диспетчера задач.
@@ -70,15 +75,16 @@ namespace TaskManager.Application
             {
                 return;
             }
-            // Если текущая задача не определена - выбираем найденную и выходим.
-            if(CurrentTask == null)
+            // Если текущая задача не определена или выполнена -
+            // выбираем найденную и выходим.
+            if (CurrentTask == null || CurrentTask.IsCompleted)
             {
                 SetCurrentTask(primaryTask);
 
                 return;
             }
             // Если приоритет найденной задачи меньше или равен текущей - выход.
-            if(primaryTask.Priority <= CurrentTask.Priority)
+            if (primaryTask.Priority <= CurrentTask.Priority)
             {
                 return;
             }
@@ -91,7 +97,19 @@ namespace TaskManager.Application
         /// </summary>
         private void ExecuteCurrentTask()
         {
+            if(CurrentTask == null)
+            {
+                return;
+            }
+
             _processor.ExecuteTask(CurrentTask);
+
+            if(CurrentTask.IsCompleted)
+            {
+                _tasks.Remove(CurrentTask);
+
+                CurrentTask = null;
+            }
         }
 
         /// <summary>
@@ -101,7 +119,7 @@ namespace TaskManager.Application
         private void SetCurrentTask(Task task)
         {
             // Старую задачу переводим в состояние готовности.
-            CurrentTask.SwitchState(TaskState.Ready);
+            CurrentTask?.SwitchState(TaskState.Ready);
             // Устанавливаем новую задачу.
             CurrentTask = task;
             // Устанавливаем новой задачи состояние выполнения.
@@ -116,6 +134,11 @@ namespace TaskManager.Application
             // Пройтись по всем задачам.
             foreach (var task in _tasks)
             {
+                // Если задача не готова - пропускаем итерацию.
+                if(task.State != TaskState.Ready)
+                {
+                    return;
+                }
                 // Вычислить значение приоритета для данной задачи.
                 var priority = _priorityComputer.ComputePriority(task, _processor.Tact);
                 // Изменить значениени приоритета для данной задачи.
@@ -135,7 +158,8 @@ namespace TaskManager.Application
             foreach (var task in _tasks)
             {
                 // Если задача не готова, пропускаем итерацию.
-                if(task.State != TaskState.Ready)
+                if (task.State != TaskState.Ready ||
+                    task.StartTact < _processor.Tact)
                 {
                     continue;
                 }
@@ -147,7 +171,7 @@ namespace TaskManager.Application
                     continue;
                 }
                 // Если приоритет меньше или равен текущему, пропускаем итерацию.
-                if(task.Priority <= primaryTask.Priority)
+                if (task.Priority <= primaryTask.Priority)
                 {
                     continue;
                 }
