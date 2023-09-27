@@ -39,8 +39,10 @@ namespace TaskManagerModel.Application
         /// Конструктор класса диспетчера задач.
         /// </summary>
         /// <param name="priorityComputer"></param>
-        public TaskManager(IPriorityComputer priorityComputer)
+        public TaskManager(Processor processor,
+            IPriorityComputer priorityComputer)
         {
+            _processor = processor;
             _priorityComputer = priorityComputer;
         }
 
@@ -50,6 +52,8 @@ namespace TaskManagerModel.Application
         /// <param name="task"></param>
         public void AddTask(Task task)
         {
+            task.SwitchState(TaskState.Ready);
+
             _tasks.Add(task);
         }
 
@@ -97,17 +101,19 @@ namespace TaskManagerModel.Application
         /// </summary>
         private void ExecuteCurrentTask()
         {
-            if(CurrentTask == null)
+            // Если текущей задачи нет - ничего не делаем.
+            if (CurrentTask == null)
             {
                 return;
             }
-
+            // Выполнить текущую задачу на процессоре.
             _processor.ExecuteTask(CurrentTask);
-
-            if(CurrentTask.IsCompleted)
+            // Если текущая задача оказалась выполненной...
+            if (CurrentTask.IsCompleted)
             {
+                // Убираем из списка текущую задачу.
                 _tasks.Remove(CurrentTask);
-
+                // Текущей задачи теперь нет.
                 CurrentTask = null;
             }
         }
@@ -135,7 +141,8 @@ namespace TaskManagerModel.Application
             foreach (var task in _tasks)
             {
                 // Если задача не готова - пропускаем итерацию.
-                if(task.State != TaskState.Ready)
+                if (task.State != TaskState.Ready ||
+                    task.StartTact > _processor.Tact)
                 {
                     return;
                 }
@@ -159,7 +166,7 @@ namespace TaskManagerModel.Application
             {
                 // Если задача не готова, пропускаем итерацию.
                 if (task.State != TaskState.Ready ||
-                    task.StartTact < _processor.Tact)
+                    task.StartTact > _processor.Tact)
                 {
                     continue;
                 }

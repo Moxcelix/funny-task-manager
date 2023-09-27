@@ -11,13 +11,18 @@ namespace TaskManagerModel.Infrastructure
 
         private readonly TaskManager _taskManager;
 
+        private readonly Processor _processor;
+
         private readonly PriorityComputer _priorityComputer;
+
+        public Processor Processor => _processor;
 
         public VirtualSystem()
         {
             _idProvider = new IdProvider();
+            _processor = new Processor();
             _priorityComputer = new PriorityComputer();
-            _taskManager = new TaskManager(_priorityComputer);
+            _taskManager = new TaskManager(_processor, _priorityComputer);
         }
 
         /// <summary>
@@ -49,6 +54,7 @@ namespace TaskManagerModel.Infrastructure
             while (_taskManager.IsRunning)
             {
                 _taskManager.Update();
+                _processor.Update();
             }
         }
     }

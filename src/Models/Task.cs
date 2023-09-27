@@ -101,6 +101,8 @@
 
             TactCount--;
 
+            Console.WriteLine($"{Name} => {TactCount}");
+
             if(TactCount == 0)
             {
                 IsCompleted = true;

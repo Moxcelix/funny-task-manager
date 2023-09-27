@@ -1,4 +1,6 @@
-﻿namespace TaskManagerModel.Models
+﻿using System.Threading;
+
+namespace TaskManagerModel.Models
 {
     /// <summary>
     /// Класс процессора.
@@ -6,9 +8,23 @@
     public class Processor
     {
         /// <summary>
+        /// Текущая задача.
+        /// </summary>
+        private Task? _task = null;
+        /// <summary>
         /// Текущий такт.
         /// </summary>
         public int Tact { get; private set; }
+
+        /// <summary>
+        /// Делегат обновления.
+        /// </summary>
+        public delegate void OnUpdateDelegate();
+
+        /// <summary>
+        /// Событие обновления.
+        /// </summary>
+        public event OnUpdateDelegate OnUpdate;
 
         /// <summary>
         /// Конструктор класса.
@@ -25,7 +41,14 @@
         /// <param name="task"></param>
         public void ExecuteTask(Task task)
         {
-            task.Execute();
+            _task = task;
+        }
+
+        public void Update()
+        {
+            OnUpdate?.Invoke();
+
+            _task?.Execute();
 
             Thread.Sleep(millisecondsTimeout: 1000);
 

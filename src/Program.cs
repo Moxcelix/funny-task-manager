@@ -1,10 +1,16 @@
-﻿namespace TaskManagerModel
+﻿using TaskManagerModel.Infrastructure;
+using TaskManagerModel.Presentation;
+
+namespace TaskManagerModel
 {
     public class Programm
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Priv");
+            var system = new VirtualSystem();
+            var app = new ConsoleApplication(system);
+            
+            app.Run();
         }
     }
 }
