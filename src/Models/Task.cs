@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace TaskManager.Models
+﻿namespace TaskManager.Models
 {
     /// <summary>
     /// Класс задачи.
@@ -16,6 +14,11 @@ namespace TaskManager.Models
         /// Имя.
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// Момент активации задачи.
+        /// </summary>
+        public int StartTact { get; }
 
         /// <summary>
         /// Первичный приоритет задачи.
@@ -51,14 +54,16 @@ namespace TaskManager.Models
             IIdProvider idProvider,
             string name,
             double primaryPriority,
-            int tactCount)
+            int tactCount,
+            int startTact)
         {
             Id = idProvider.GetId();
             Name = name;
             State = TaskState.Running;
             PrimaryPriority = primaryPriority;
-            Priority = PrimaryPriority;
+            Priority = primaryPriority;
             TactCount = tactCount;
+            StartTact = startTact;
         }
 
         /// <summary>

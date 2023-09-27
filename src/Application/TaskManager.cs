@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using TaskManager.Models;
 
-namespace TaskManager.Models
+using Task = TaskManager.Models.Task;
+
+namespace TaskManager.Application
 {
     /// <summary>
     /// Класс диспетчера задач.
