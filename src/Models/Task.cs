@@ -91,11 +91,7 @@ namespace TaskManager.Models
 
             SwitchState(TaskState.Running);
 
-            Thread.Sleep(millisecondsTimeout: 1000);
-
             TactCount--;
-
-            SwitchState(TaskState.Ready);
         }
     }
 }

@@ -27,6 +27,8 @@
         {
             task.Execute();
 
+            Thread.Sleep(millisecondsTimeout: 1000);
+
             Tact++;
         }
     }
