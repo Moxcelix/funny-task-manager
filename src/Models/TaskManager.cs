@@ -48,12 +48,54 @@ namespace TaskManager.Models
             RecomputePriority();
         }
 
+        /// <summary>
+        /// Рассчитать новые значения приоритетов.
+        /// </summary>
         private void RecomputePriority()
         {
+            // Пройтись по всем задачам.
             foreach (var task in _tasks)
             {
-                _priorityComputer.ComputePriority(task, _processor.Tact);
+                // Вычислить значение приоритета для данной задачи.
+                var priority = _priorityComputer.ComputePriority(task, _processor.Tact);
+                // Изменить значениени приоритета для данной задачи.
+                task.SwitchPriority(priority);
             }
+        }
+
+        /// <summary>
+        /// Метод находит первичную задачу для выполнения
+        /// </summary>
+        /// <returns>task</returns>
+        private Task? GetPrimaryTask()
+        {
+            // Начальное значение искомой задачи null.
+            var primaryTask = (Task?)null;
+            // Итерируемся по задачам.
+            foreach (var task in _tasks)
+            {
+                // Если задача не готова, пропускаем итерацию.
+                if(task.State != TaskState.Ready)
+                {
+                    continue;
+                }
+                // Если задача еще не найдена, задаем ее и пропускаем итерацию.
+                if (primaryTask == null)
+                {
+                    primaryTask = task;
+
+                    continue;
+                }
+                // Если приоритет меньше или равен текущему, пропускаем итерацию.
+                if(task.Priority <= primaryTask.Priority)
+                {
+                    continue;
+                }
+                // В противном случае обновляем искомую задачу на текущую.
+                primaryTask = task;
+            }
+            // Возвращаем найденное значение.
+            return primaryTask;
         }
     }
 }
