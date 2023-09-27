@@ -23,6 +23,11 @@ namespace TaskManager.Models
         private readonly Processor _processor;
 
         /// <summary>
+        /// Текущая задача.
+        /// </summary>
+        public Task CurrentTask { get; private set; }
+
+        /// <summary>
         /// Конструктор класса диспетчера задач.
         /// </summary>
         /// <param name="priorityComputer"></param>
@@ -46,6 +51,58 @@ namespace TaskManager.Models
         public void Update()
         {
             RecomputePriority();
+            UpdateCurrentTask();
+            ExecuteCurrentTask();
+        }
+
+        /// <summary>
+        /// Обновление текущей задачи.
+        /// </summary>
+        private void UpdateCurrentTask()
+        {
+            // Получаем задачу с наивысшим приоритетом.
+            var primaryTask = FindPrimaryTask();
+            // Если такая задача не найдена - выходим.
+            if (primaryTask == null)
+            {
+                return;
+            }
+            // Если текущая задача не определена - выбираем найденную и выходим.
+            if(CurrentTask == null)
+            {
+                SetCurrentTask(primaryTask);
+
+                return;
+            }
+            // Если приоритет найденной задачи меньше или равен текущей - выход.
+            if(primaryTask.Priority <= CurrentTask.Priority)
+            {
+                return;
+            }
+            // В остальных случаях устанавливаем новую задачу на исполнение.
+            SetCurrentTask(primaryTask);
+        }
+
+        /// <summary>
+        /// Выполнение текущей задачи.
+        /// </summary>
+        private void ExecuteCurrentTask()
+        {
+            _processor.ExecuteTask(CurrentTask);
+        }
+
+        /// <summary>
+        /// Устанавливает текущую задачу на исполнение.
+        /// </summary>
+        /// <param name="task"></param>
+        private void SetCurrentTask(Task task)
+        {
+            // Старую задачу переводим в состояние готовности.
+            CurrentTask.SwitchState(TaskState.Ready);
+            // Устанавливаем новую задачу.
+            CurrentTask = task;
+            // Устанавливаем новой задачи состояние выполнения.
+            CurrentTask.SwitchState(TaskState.Running);
         }
 
         /// <summary>
@@ -67,7 +124,7 @@ namespace TaskManager.Models
         /// Метод находит первичную задачу для выполнения
         /// </summary>
         /// <returns>task</returns>
-        private Task? GetPrimaryTask()
+        private Task? FindPrimaryTask()
         {
             // Начальное значение искомой задачи null.
             var primaryTask = (Task?)null;
