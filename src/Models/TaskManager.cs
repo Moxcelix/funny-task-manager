@@ -10,7 +10,26 @@ namespace TaskManager.Models
         /// <summary>
         /// Список задач.
         /// </summary>
-        private readonly List<Task> _tasks = new List<Task>();
+        private readonly List<Task> _tasks = new();
+
+        /// <summary>
+        /// Вычислитель приоритета.
+        /// </summary>
+        private readonly IPriorityComputer _priorityComputer;
+
+        /// <summary>
+        /// Процессор.
+        /// </summary>
+        private readonly Processor _processor;
+
+        /// <summary>
+        /// Конструктор класса диспетчера задач.
+        /// </summary>
+        /// <param name="priorityComputer"></param>
+        public TaskManager(IPriorityComputer priorityComputer)
+        {
+            _priorityComputer = priorityComputer;
+        }
 
         /// <summary>
         /// Метод добавления задачи.
@@ -26,7 +45,15 @@ namespace TaskManager.Models
         /// </summary>
         public void Update()
         {
+            RecomputePriority();
+        }
 
+        private void RecomputePriority()
+        {
+            foreach (var task in _tasks)
+            {
+                _priorityComputer.ComputePriority(task, _processor.Tact);
+            }
         }
     }
 }
