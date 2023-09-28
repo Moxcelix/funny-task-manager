@@ -1,15 +1,28 @@
 ﻿namespace TaskManagerModel.Presentation
 {
+    /// <summary>
+    /// Класс таблицы в консоли.
+    /// </summary>
     public class ConsoleTable
     {
-        private readonly int _tableWidth = 73;
+        /// <summary>
+        /// Ширина таблицы.
+        /// </summary>
+        private readonly int _tableWidth;
 
+        /// <summary>
+        /// Массив ширин столбцов.
+        /// </summary>
         private readonly int[] _columnWidths;
 
+        /// <summary>
+        /// Конструктор класса.
+        /// </summary>
+        /// <param name="columnWidths"></param>
         public ConsoleTable(int[] columnWidths)
         {
             _columnWidths = columnWidths;
-
+            // Подсчет ширины таблицы.
             _tableWidth = 1;
 
             foreach (var item in _columnWidths)
@@ -18,11 +31,18 @@
             }
         }
 
+        /// <summary>
+        /// Напечатать разделительную полосу.
+        /// </summary>
         public void PrintLine()
         {
             Console.WriteLine(new string('-', _tableWidth));
         }
 
+        /// <summary>
+        /// Напечатать ряд.
+        /// </summary>
+        /// <param name="columns"></param>
         public void PrintRow(params string[] columns)
         {
             string row = "|";
@@ -35,7 +55,13 @@
             Console.WriteLine(row);
         }
 
-        static string AlignCentre(string text, int width)
+        /// <summary>
+        /// Выравнять по ширине.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="width"></param>
+        /// <returns></returns>
+        private static string AlignCentre(string text, int width)
         {
             text = text.Length > width ? text.Substring(0, width - 3) + "..." : text;
 
