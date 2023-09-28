@@ -50,6 +50,8 @@ namespace TaskManagerModel.Models
 
             _task?.Execute();
 
+            _task = null;
+
             Thread.Sleep(millisecondsTimeout: 1000);
 
             Tact++;

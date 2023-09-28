@@ -5,8 +5,8 @@
     /// </summary>
     public enum TaskState
     {
-        Running,    // Выполнение.
         Sleeping,   // Бездействие.
+        Running,    // Выполнение.
         Ready,      // Готовность.
         Output      // Ожидание окончания вывода.
     }

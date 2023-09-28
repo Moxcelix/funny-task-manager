@@ -16,6 +16,11 @@ namespace TaskManagerModel.Application
         private readonly List<Task> _tasks = new();
 
         /// <summary>
+        /// Очередь задач.
+        /// </summary>
+        private readonly List<Task> _taskQueue = new();
+
+        /// <summary>
         /// Вычислитель приоритета.
         /// </summary>
         private readonly IPriorityComputer _priorityComputer;
@@ -26,6 +31,11 @@ namespace TaskManagerModel.Application
         private readonly Processor _processor;
 
         /// <summary>
+        /// Интервал, через который будет меняться приоритет.
+        /// </summary>
+        private int _interval = 1;
+
+        /// <summary>
         /// Текущая задача.
         /// </summary>
         public Task? CurrentTask { get; private set; }
@@ -34,6 +44,11 @@ namespace TaskManagerModel.Application
         /// Пока очередь не закончилась, диспетчер задач работает.
         /// </summary>
         public bool IsRunning => _tasks.Count > 0;
+
+        /// <summary>
+        /// Публичное свойство очередь задач.
+        /// </summary>
+        public List<Task> TaskQueue => _taskQueue;
 
         /// <summary>
         /// Конструктор класса диспетчера задач.
@@ -52,9 +67,23 @@ namespace TaskManagerModel.Application
         /// <param name="task"></param>
         public void AddTask(Task task)
         {
-            task.SwitchState(TaskState.Ready);
-
             _tasks.Add(task);
+        }
+
+        /// <summary>
+        /// Установить интервал обновления приоритетов.
+        /// </summary>
+        /// <param name="interval"></param>
+        public void SetInterval(int interval)
+        {
+            if (interval < 1)
+            {
+                _interval = 1;
+
+                return;
+            }
+
+            _interval = interval;
         }
 
         /// <summary>
@@ -62,9 +91,35 @@ namespace TaskManagerModel.Application
         /// </summary>
         public void Update()
         {
-            RecomputePriority();
+            // Обновить состояния задач.
+            UpdateTaskStates();
+            // Сформировать очередь задач.
+            FormTaskQueue();
+            // Если такт процессора кратен интервалу обновления приоритетов...
+            if (_processor.Tact % _interval == 0)
+            {
+                // Пересчитать приоритеты.
+                RecomputePriority();
+            }
+            // Обновить текущую задачу.
             UpdateCurrentTask();
+            // Выполнить текущую задачу.
             ExecuteCurrentTask();
+        }
+
+        /// <summary>
+        /// Обновить состояния задач.
+        /// </summary>
+        private void UpdateTaskStates()
+        {
+            foreach (var task in _tasks)
+            {
+                if (task.State == TaskState.Sleeping &&
+                    _processor.Tact >= task.StartTact)
+                {
+                    task.SwitchState(TaskState.Ready);
+                }
+            }
         }
 
         /// <summary>
@@ -74,26 +129,29 @@ namespace TaskManagerModel.Application
         {
             // Получаем задачу с наивысшим приоритетом.
             var primaryTask = FindPrimaryTask();
-            // Если такая задача не найдена - выходим.
-            if (primaryTask == null)
-            {
-                return;
-            }
-            // Если текущая задача не определена или выполнена -
-            // выбираем найденную и выходим.
-            if (CurrentTask == null || CurrentTask.IsCompleted)
+            // Если текущая задача не определена, выбираем найденную и выходим.
+            if (CurrentTask == null)
             {
                 SetCurrentTask(primaryTask);
 
                 return;
             }
-            // Если приоритет найденной задачи меньше или равен текущей - выход.
-            if (primaryTask.Priority <= CurrentTask.Priority)
+            // Если текущая задача оказалась выполненной...
+            if (CurrentTask.IsCompleted)
             {
+                // Убираем из списка текущую задачу.
+                _tasks.Remove(CurrentTask);
+                // Устанавливаем новую задачу.
+                SetCurrentTask(primaryTask);
+
                 return;
             }
-            // В остальных случаях устанавливаем новую задачу на исполнение.
-            SetCurrentTask(primaryTask);
+            // Если задача найдена и ее приоритет больше текущей...
+            if (primaryTask != null && primaryTask.Priority > CurrentTask.Priority)
+            {
+                // Устанавливаем новую задачу на исполнение.
+                SetCurrentTask(primaryTask);
+            }
         }
 
         /// <summary>
@@ -108,13 +166,24 @@ namespace TaskManagerModel.Application
             }
             // Выполнить текущую задачу на процессоре.
             _processor.ExecuteTask(CurrentTask);
-            // Если текущая задача оказалась выполненной...
-            if (CurrentTask.IsCompleted)
+        }
+
+        /// <summary>
+        /// Сформировать очередь задач
+        /// </summary>
+        private void FormTaskQueue()
+        {
+            // Очищаем очередь.
+            _taskQueue.Clear();
+            // Перебрать все задачи.
+            foreach (var task in _tasks)
             {
-                // Убираем из списка текущую задачу.
-                _tasks.Remove(CurrentTask);
-                // Текущей задачи теперь нет.
-                CurrentTask = null;
+                // Если задача готова к выполнению.
+                if (task.State == TaskState.Ready)
+                {
+                    // Добавить задачу в очередь.
+                    _taskQueue.Add(task);
+                }
             }
         }
 
@@ -122,14 +191,14 @@ namespace TaskManagerModel.Application
         /// Устанавливает текущую задачу на исполнение.
         /// </summary>
         /// <param name="task"></param>
-        private void SetCurrentTask(Task task)
+        private void SetCurrentTask(Task? task)
         {
-            // Старую задачу переводим в состояние готовности.
+            // Старую задачу переводим в состояние готовности, если она есть.
             CurrentTask?.SwitchState(TaskState.Ready);
             // Устанавливаем новую задачу.
             CurrentTask = task;
-            // Устанавливаем новой задачи состояние выполнения.
-            CurrentTask.SwitchState(TaskState.Running);
+            // Устанавливаем новой задаче состояние выполнения, если она есть.
+            CurrentTask?.SwitchState(TaskState.Running);
         }
 
         /// <summary>
@@ -138,14 +207,8 @@ namespace TaskManagerModel.Application
         private void RecomputePriority()
         {
             // Пройтись по всем задачам.
-            foreach (var task in _tasks)
+            foreach (var task in _taskQueue)
             {
-                // Если задача не готова - пропускаем итерацию.
-                if (task.State != TaskState.Ready ||
-                    task.StartTact > _processor.Tact)
-                {
-                    return;
-                }
                 // Вычислить значение приоритета для данной задачи.
                 var priority = _priorityComputer.ComputePriority(task, _processor.Tact);
                 // Изменить значениени приоритета для данной задачи.
@@ -162,14 +225,8 @@ namespace TaskManagerModel.Application
             // Начальное значение искомой задачи null.
             var primaryTask = (Task?)null;
             // Итерируемся по задачам.
-            foreach (var task in _tasks)
+            foreach (var task in _taskQueue)
             {
-                // Если задача не готова, пропускаем итерацию.
-                if (task.State != TaskState.Ready ||
-                    task.StartTact > _processor.Tact)
-                {
-                    continue;
-                }
                 // Если задача еще не найдена, задаем ее и пропускаем итерацию.
                 if (primaryTask == null)
                 {
@@ -177,7 +234,7 @@ namespace TaskManagerModel.Application
 
                     continue;
                 }
-                // Если приоритет меньше или равен текущему, пропускаем итерацию.
+                // Если приоритет меньше или равен найденному, пропускаем итерацию.
                 if (task.Priority <= primaryTask.Priority)
                 {
                     continue;

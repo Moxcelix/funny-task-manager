@@ -20,9 +20,22 @@ namespace TaskManagerModel.Presentation
 
         public void Run()
         {
-            _system.AddTask("Task1", 0, 2, 0);
-            _system.AddTask("Task2", 1, 4, 0);
-            _system.AddTask("Task3", 2, 3, 9);
+            Console.Write("Введите интервал через который будет меняться приоритет -> ");
+            var interval = int.Parse(Console.ReadLine());
+
+            _system.TaskManager.SetInterval(interval);
+
+            Console.Write("Введите количество задач -> ");
+            var count = int.Parse(Console.ReadLine());
+
+            Console.WriteLine();
+
+            for (int i = 0; i < count; i++)
+            {
+                InputTask();
+
+                Console.WriteLine();
+            }
 
             _system.Start();
         }
@@ -30,6 +43,22 @@ namespace TaskManagerModel.Presentation
         private void OnProcessorUpdate()
         {
             Console.WriteLine(_system.Processor.Tact);
+        }
+
+        private void InputTask()
+        {
+            Console.Write("Введите название задачи -> ");
+            var name = Console.ReadLine();
+            Console.Write("Введите приоритет задачи -> ");
+            var priority = double.Parse(Console.ReadLine());
+            Console.Write("Введите коэффициент приоритета -> ");
+            var coefficient = double.Parse(Console.ReadLine());
+            Console.Write("Введите время исполнения в тактах -> ");
+            var tackCount = int.Parse(Console.ReadLine());
+            Console.Write("Введите время активации -> ");
+            var startTact = int.Parse(Console.ReadLine());
+
+            _system.AddTask(name, priority, coefficient, tackCount, startTact);
         }
     }
 }

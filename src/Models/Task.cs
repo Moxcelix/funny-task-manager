@@ -59,14 +59,16 @@
             IIdProvider idProvider,
             string name,
             double primaryPriority,
+            double coefficient,
             int tactCount,
             int startTact)
         {
             Id = idProvider.GetId();
             Name = name;
-            State = TaskState.Running;
+            State = TaskState.Sleeping;
             PrimaryPriority = primaryPriority;
             Priority = primaryPriority;
+            Coefficient = coefficient;
             TactCount = tactCount;
             StartTact = startTact;
         }
@@ -100,8 +102,6 @@
             }
 
             TactCount--;
-
-            Console.WriteLine($"{Name} => {TactCount}");
 
             if(TactCount == 0)
             {

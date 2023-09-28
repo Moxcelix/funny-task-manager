@@ -17,6 +17,8 @@ namespace TaskManagerModel.Infrastructure
 
         public Processor Processor => _processor;
 
+        public TaskManager TaskManager => _taskManager;
+
         public VirtualSystem()
         {
             _idProvider = new IdProvider();
@@ -35,10 +37,16 @@ namespace TaskManagerModel.Infrastructure
         public void AddTask(
             string name,
             double priority,
+            double coefficient,
             int tactCount,
             int startTact)
         {
-            var task = new Task(_idProvider, name, priority, tactCount, startTact);
+            var task = new Task(_idProvider,
+                name,
+                priority,
+                coefficient,
+                tactCount,
+                startTact);
 
             _taskManager.AddTask(task);
         }
