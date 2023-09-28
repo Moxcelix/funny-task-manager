@@ -15,6 +15,16 @@ namespace TaskManagerModel.Infrastructure
 
         private readonly PriorityComputer _priorityComputer;
 
+        /// <summary>
+        /// Делегат конца работы.
+        /// </summary>
+        public delegate void OnWorkEndDelegate();
+
+        /// <summary>
+        /// Событие конца работы.
+        /// </summary>
+        public event OnWorkEndDelegate? OnWorkEnd;
+
         public Processor Processor => _processor;
 
         public TaskManager TaskManager => _taskManager;
@@ -64,6 +74,8 @@ namespace TaskManagerModel.Infrastructure
                 _taskManager.Update();
                 _processor.Update();
             }
+
+            OnWorkEnd?.Invoke();
         }
     }
 }

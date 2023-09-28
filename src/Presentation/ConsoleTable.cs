@@ -70,7 +70,7 @@
         /// <returns></returns>
         private static string AlignCentre(string text, int width)
         {
-            text = text.Length > width ? text.Substring(0, width - 3) + "..." : text;
+            text = text.Length > width - 2 ? text.Substring(0, width - 5) + "..." : text;
 
             if (string.IsNullOrEmpty(text))
             {

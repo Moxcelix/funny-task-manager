@@ -51,14 +51,19 @@ namespace TaskManagerModel.Application
         public bool IsRunning => _tasks.Count > 0;
 
         /// <summary>
-        /// Публичное свойство очередь задач.
+        /// Публичное свойство подлежащие выполнению задачи.
         /// </summary>
-        public List<Task> TaskQueue => _taskQueue;
+        public List<Task> Tasks => _tasks;
 
         /// <summary>
         /// Публичное свойство информация о тактах.
         /// </summary>
         public List<TactData> TactDatas => _tactDatas;
+
+        /// <summary>
+        /// Публичное свойство интервал обновления приоритетов.
+        /// </summary>
+        public int Interval => _interval;
 
         /// <summary>
         /// Конструктор класса диспетчера задач.
@@ -111,12 +116,12 @@ namespace TaskManagerModel.Application
                 // Пересчитать приоритеты.
                 RecomputePriority();
             }
+            // Добавить информацию о такте.
+            AddTactData();
             // Обновить текущую задачу.
             UpdateCurrentTask();
             // Выполнить текущую задачу.
             ExecuteCurrentTask();
-            // Добавить информацию о такте.
-            AddTactData();
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace TaskManagerModel.Models
         /// <summary>
         /// Событие обновления.
         /// </summary>
-        public event OnUpdateDelegate OnUpdate;
+        public event OnUpdateDelegate? OnUpdate;
 
         /// <summary>
         /// Конструктор класса.
@@ -52,7 +52,7 @@ namespace TaskManagerModel.Models
 
             _task = null;
 
-            Thread.Sleep(millisecondsTimeout: 1000);
+            Thread.Sleep(millisecondsTimeout: 100);
 
             Tact++;
         }
