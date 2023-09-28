@@ -36,7 +36,14 @@
         /// </summary>
         public void PrintLine()
         {
-            Console.WriteLine(new string('-', _tableWidth));
+            Console.Write("+");
+            foreach (var item in _columnWidths)
+            {
+                Console.Write(new string('-', item));
+                Console.Write("+");
+            }
+
+            Console.WriteLine();
         }
 
         /// <summary>
