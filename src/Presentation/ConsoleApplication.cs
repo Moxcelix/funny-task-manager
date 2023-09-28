@@ -45,6 +45,10 @@ namespace TaskManagerModel.Presentation
             Console.WriteLine(_system.Processor.Tact);
         }
 
+        private void PrintTask()
+        {
+
+        }
         private void InputTask()
         {
             Console.Write("Введите название задачи -> ");
