@@ -21,6 +21,11 @@ namespace TaskManagerModel.Application
         private readonly List<Task> _taskQueue = new();
 
         /// <summary>
+        /// Информация о тактах.
+        /// </summary>
+        private readonly List<TactData> _tactDatas = new();
+
+        /// <summary>
         /// Вычислитель приоритета.
         /// </summary>
         private readonly IPriorityComputer _priorityComputer;
@@ -49,6 +54,11 @@ namespace TaskManagerModel.Application
         /// Публичное свойство очередь задач.
         /// </summary>
         public List<Task> TaskQueue => _taskQueue;
+
+        /// <summary>
+        /// Публичное свойство информация о тактах.
+        /// </summary>
+        public List<TactData> TactDatas => _tactDatas;
 
         /// <summary>
         /// Конструктор класса диспетчера задач.
@@ -105,6 +115,19 @@ namespace TaskManagerModel.Application
             UpdateCurrentTask();
             // Выполнить текущую задачу.
             ExecuteCurrentTask();
+            // Добавить информацию о такте.
+            AddTactData();
+        }
+
+        /// <summary>
+        /// Добавить информацию о такте.
+        /// </summary>
+        private void AddTactData()
+        {
+            _tactDatas.Add(new TactData(
+                _processor.Tact,
+                CurrentTask, 
+                _taskQueue.ToArray()));
         }
 
         /// <summary>
